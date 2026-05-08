@@ -1,117 +1,200 @@
-# 🎯 MVP — Controle Financeiro Pessoal
+# MVP — Controle Financeiro Pessoal
+
+Documento de escopo do produto mínimo viável (MVP). Serve como referência durante o desenvolvimento para manter o foco no que é essencial e evitar scope creep.
 
 ---
 
-## 📌 Visão Geral
+## Objetivo
 
-Este MVP tem como objetivo criar uma aplicação web simples para **controle financeiro pessoal**, permitindo o registro de **entradas e saídas** e a visualização do **saldo atual por banco**.
-
-O foco está em **funcionalidade, clareza e aprendizado técnico**, não em estética ou completude.
+Construir uma aplicação web onde múltiplos usuários possam registrar receitas e despesas, visualizar o saldo por conta e ter um resumo financeiro do mês — de forma simples, segura e extensível.
 
 ---
 
-## 🧠 Objetivo do MVP
+## Usuários
 
-Ao final do MVP, o usuário deve conseguir:
-
-- Registrar movimentações financeiras
-- Consultar o histórico de movimentações
-- Visualizar o saldo atual por banco
+- Pessoas físicas que querem organizar as próprias finanças
+- Cada usuário tem seus dados completamente isolados dos demais (multi-tenancy)
 
 ---
 
-## ✅ Funcionalidades Incluídas
+## Funcionalidades do MVP
 
-### 💸 Cadastro de Movimentações
+### 1. Autenticação
+- Cadastro com nome, e-mail e senha
+- Login e logout
+- Proteção de todas as rotas autenticadas
 
-O sistema deve permitir o cadastro de movimentações com os seguintes campos:
-
-- **Valor** (obrigatório, numérico e positivo)
-- **Tipo**: `Entrada` ou `Saída`
-- **Banco** (selecionável)
-- **Data da movimentação**
-- **Observação** (opcional)
-
-**Regras:**
-
-- O valor deve ser sempre positivo
-- O tipo define se o valor será somado ou subtraído do saldo
+> ⚠️ Não inclui no MVP: recuperação de senha, OAuth (Google/GitHub), 2FA.
 
 ---
 
-### 📄 Listagem de Movimentações
+### 2. Contas
+- Criar conta (ex: Nubank, Carteira, Poupança)
+- Listar contas do usuário
+- Editar nome da conta
+- Excluir conta (somente se não houver transações vinculadas)
+- **Saldo calculado dinamicamente** — nunca salvo diretamente no banco
 
-O sistema deve exibir uma lista contendo todas as movimentações cadastradas, apresentando:
-
-- Data
-- Tipo
-- Valor
-- Banco
-- Observação
-
-A listagem deve ser ordenada por **data decrescente** (mais recente primeiro).
+> ⚠️ Não inclui no MVP: transferência entre contas, múltiplas moedas.
 
 ---
 
-### 🏦 Cadastro de Bancos
+### 3. Transações
+- Registrar transação com:
+  - Tipo: `receita` ou `despesa`
+  - Valor (usando `Decimal` para precisão monetária)
+  - Data
+  - Categoria
+  - Conta vinculada
+  - Descrição (opcional)
+- Listar transações com filtro por período e conta
+- Editar transação
+- Excluir transação
 
-O sistema deve permitir o cadastro manual de bancos (ex: Nubank, Itaú, Caixa), que serão utilizados no cadastro das movimentações.
-
----
-
-### 📊 Visualização de Saldos
-
-O sistema deve exibir:
-
-- O **saldo atual por banco**
-- O **saldo total geral**
-
-**Regra de cálculo:**
-
-- Saldo = Soma das Entradas − Soma das Saídas
-
+> ⚠️ Não inclui no MVP: transações recorrentes, anexos, importação de extrato, transferências.
 
 ---
 
-## ❌ Fora do Escopo do MVP
+### 4. Categorias
+- Categorias padrão pré-cadastradas no sistema (ex: Alimentação, Transporte, Saúde, Lazer, Salário)
+- Usuário utiliza as categorias padrão para registrar transações
 
-As funcionalidades abaixo **não fazem parte** deste MVP e devem ser tratadas como evoluções futuras:
-
-- Cartão de crédito
-- Parcelamento
-- Categorias de gastos
-- Autenticação / login
-- Multiusuário
-- Dashboard com gráficos
-- Exportação de dados
-- Edição ou exclusão de movimentações
+> ⚠️ Não inclui no MVP: categorias customizadas por usuário, subcategorias.
 
 ---
 
-## 🧪 Critérios de Sucesso
+### 5. Dashboard
+- Saldo total (soma de todas as contas)
+- Saldo por conta
+- Total de receitas do mês atual
+- Total de despesas do mês atual
+- Resultado do mês (receitas − despesas)
 
-O MVP será considerado concluído quando:
-
-- Uma movimentação puder ser cadastrada com sucesso
-- A movimentação cadastrada aparecer na listagem
-- O saldo por banco for calculado corretamente
-- O saldo total refletir corretamente entradas e saídas
-- A aplicação funcionar localmente via Docker
-
----
-
-## ⚙️ Restrições Técnicas
-
-- **Backend**: FastAPI (Python)
-- **Banco de Dados**: PostgreSQL
-- **Frontend**: HTML + JavaScript
-- **Execução**: Ambiente local com Docker
-- **Autenticação**: Não implementada
+> ⚠️ Não inclui no MVP: gráficos avançados, comparativo entre meses, projeções.
 
 ---
 
-## 📝 Observações Finais
+## Fora do Escopo (backlog futuro)
 
-Este MVP serve como base inicial para aprendizado e evolução futura do projeto, permitindo a adição de novas funcionalidades sem grandes refatorações.
+Estas funcionalidades foram conscientemente deixadas de fora do MVP, mas a arquitetura deve reservar espaço para elas:
+
+| Funcionalidade | Motivo de adiar |
+|---|---|
+| Transferência entre contas | Aumenta complexidade do modelo de transações |
+| Metas financeiras | Requer lógica de projeção |
+| Categorias customizadas | Não é bloqueante para o MVP |
+| Transações recorrentes | Complexidade de agendamento |
+| Importação de extrato (OFX/CSV) | Parsing e deduplicação são trabalhosos |
+| Relatórios avançados e gráficos | Pode ser adicionado depois do core funcionar |
+| Recuperação de senha | Requer integração com serviço de e-mail |
+| App mobile | Fase posterior |
 
 ---
+
+## Stack Técnica
+
+| Camada | Tecnologia |
+|---|---|
+| Back-end | Python + FastAPI |
+| Banco de dados | PostgreSQL |
+| ORM | SQLAlchemy |
+| Migrações | Alembic |
+| Autenticação | JWT (via `python-jose`) |
+| Front-end | A definir (React, Vue ou Jinja2 templates) |
+| Deploy | A definir |
+
+---
+
+## Arquitetura de Pastas (sugerida)
+
+```
+/
+├── app/
+│   ├── api/
+│   │   └── v1/                  # Versionamento desde o início
+│   │       ├── auth.py
+│   │       ├── accounts.py
+│   │       ├── transactions.py
+│   │       └── dashboard.py
+│   ├── core/
+│   │   ├── config.py
+│   │   └── security.py
+│   ├── models/                  # Modelos do banco (SQLAlchemy)
+│   ├── schemas/                 # Validação de entrada/saída (Pydantic)
+│   ├── services/                # Regras de negócio (separadas dos endpoints)
+│   └── db/
+│       └── session.py
+├── alembic/                     # Migrações
+├── tests/
+├── .env.example
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Modelo de Dados (simplificado)
+
+```
+users
+  id, name, email, hashed_password, created_at
+
+accounts
+  id, user_id (FK), name, created_at
+  [saldo = calculado via query nas transactions]
+
+categories
+  id, name, type (income | expense)
+  [padrão do sistema, sem user_id no MVP]
+
+transactions
+  id, user_id (FK), account_id (FK), category_id (FK)
+  type (income | expense), amount (Numeric), date, description
+  transfer_id (nullable — reservado para transferências futuras)
+  created_at, updated_at
+```
+
+> **Regra importante:** o campo `transfer_id` já existe na tabela, mas fica `NULL` no MVP. Quando transferências forem implementadas, as duas transações vinculadas terão o mesmo `transfer_id`.
+
+---
+
+## Decisões Técnicas Relevantes
+
+**Saldo nunca é salvo no banco**
+O saldo de uma conta é sempre calculado com `SUM` das transações. Isso evita inconsistências e simplifica a lógica de exclusão/edição de transações.
+
+**Versionamento de API desde o início**
+Todos os endpoints ficam sob `/api/v1/`. Quando houver breaking changes, cria-se `/api/v2/` sem remover a anterior.
+
+**Regras de negócio na camada de serviços**
+Nenhuma regra de negócio fica dentro dos endpoints. Os endpoints apenas recebem, validam e delegam para `services/`.
+
+**Decimal para valores monetários**
+Nunca usar `float` para dinheiro. Usar `Numeric(precision=12, scale=2)` no banco e `Decimal` no Python.
+
+---
+
+## Critérios de Conclusão do MVP
+
+O MVP está pronto quando:
+
+- [ ] Usuário consegue se cadastrar e fazer login
+- [ ] Usuário consegue criar e listar suas contas
+- [ ] Usuário consegue registrar uma receita ou despesa
+- [ ] Usuário consegue editar ou excluir uma transação
+- [ ] Dashboard exibe saldo e resumo do mês corretamente
+- [ ] Dados de um usuário são inacessíveis por outro
+- [ ] API está documentada (FastAPI gera automaticamente via `/docs`)
+- [ ] Há ao menos testes unitários nos serviços críticos
+
+---
+
+## Próximos Passos
+
+1. Revisar e validar o modelo de dados
+2. Configurar o projeto (estrutura de pastas, dependências, `.env`)
+3. Implementar autenticação
+4. Implementar CRUD de contas
+5. Implementar CRUD de transações
+6. Implementar dashboard
+7. Testes e ajustes
